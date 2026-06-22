@@ -26,6 +26,17 @@ ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 # Ensure ROCm tools (like rocm-smi) are in PATH even when launched from GUI environments (Tauri/Desktop)
 export PATH="/opt/rocm/bin:/opt/rocm-7.2.4/bin:$PATH"
 
+# Ensure ROCm runtime libraries (libroctx64.so.4, libhsa-runtime64.so.1, etc.) are
+# discoverable by the dynamic linker. On Ubuntu, /opt/rocm/lib is NOT in the default
+# ldconfig search path; the system .conf file only points to /opt/rocm-5.4.1/lib.
+# Prepend rather than append so ROCm's libs win over any stale 5.4.1 versions.
+if [ -d /opt/rocm/lib ]; then
+    case ":$LD_LIBRARY_PATH:" in
+        *:/opt/rocm/lib:*) ;;  # already present
+        *) export LD_LIBRARY_PATH="/opt/rocm/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" ;;
+    esac
+fi
+
 PORT=8188
 GUARD=true
 GPU_DETECT=true
