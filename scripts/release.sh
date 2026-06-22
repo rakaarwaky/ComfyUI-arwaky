@@ -235,7 +235,8 @@ else
     fi
   else
     echo ""
-    pass "shellcheck (not installed, run: sudo dnf install -y shellcheck)"
+    pass "shellcheck (not installed, run: sudo apt install -y shellcheck   # Debian/Ubuntu"\
+          "   # or:   sudo dnf install -y shellcheck   # Fedora")
   fi
 
   # 1f. tauri config validation

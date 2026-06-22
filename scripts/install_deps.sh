@@ -20,22 +20,45 @@ echo " ComfyUI Desktop — Full Installer"
 echo "========================================"
 echo ""
 
-# 1. Check if python3.12 is installed
+# 1. Check if python3.12 is installed (or installable via uv/apt)
 echo "[1/5] Checking for Python 3.12..."
-if ! command -v python3.12 &>/dev/null; then
-    echo "❌ Error: Python 3.12 is not installed on this system."
+NEEDS_PY312_INSTALL=0
+if command -v python3.12 &>/dev/null; then
+    echo "  ✅ Python 3.12 is available: $(python3.12 --version)"
+elif command -v uv &>/dev/null; then
+    echo "  Python 3.12 not on PATH, but uv is available — will install via uv."
+    NEEDS_PY312_INSTALL=1
+elif command -v apt-get &>/dev/null; then
+    echo "  Python 3.12 not on PATH, but apt-get is available — will install via apt."
+    NEEDS_PY312_INSTALL=1
+    PKG_MANAGER="apt"
+else
+    echo "❌ Error: Python 3.12 is not installed and no package manager (uv/apt) found."
     echo "This project requires Python 3.12 specifically for ROCm compatibility."
-    echo "Please install it using your package manager, for example:"
-    echo "  sudo dnf install -y python3.12 python3.12-devel"
+    echo "Install it using one of:"
+    echo "  - uv (recommended): curl -LsSf https://astral.sh/uv/install.sh | sh"
+    echo "  - apt (Debian/Ubuntu): sudo apt install -y python3.12 python3.12-venv python3.12-dev"
+    echo "  - dnf (Fedora):       sudo dnf install -y python3.12 python3.12-devel"
     exit 1
 fi
-echo "  ✅ Python 3.12 is available: $(python3.12 --version)"
 
 # 2. Check and initialize virtual environment
 echo "[2/5] Setting up Python virtual environment..."
 if [ ! -d "$VENV_DIR" ]; then
     echo "  Virtual environment not found. Creating one at $VENV_DIR..."
-    python3.12 -m venv "$VENV_DIR"
+    if [ "$NEEDS_PY312_INSTALL" -eq 1 ] && command -v uv &>/dev/null; then
+        # uv can install Python 3.12 and create the venv in one step
+        uv venv "$VENV_DIR" --python 3.12 --seed
+    elif [ "$NEEDS_PY312_INSTALL" -eq 1 ] && [ "${PKG_MANAGER:-}" = "apt" ]; then
+        # apt: install system Python 3.12 then create venv
+        SUDO=""
+        [ "$(id -u)" -ne 0 ] && SUDO="sudo"
+        $SUDO apt-get update -y >/dev/null
+        $SUDO apt-get install -y python3.12 python3.12-venv python3.12-dev
+        python3.12 -m venv "$VENV_DIR"
+    else
+        python3.12 -m venv "$VENV_DIR"
+    fi
     echo "  ✅ Virtual environment created."
 else
     echo "  ✅ Virtual environment already exists at $VENV_DIR."
