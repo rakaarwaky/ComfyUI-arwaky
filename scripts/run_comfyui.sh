@@ -31,7 +31,9 @@ export PATH="/opt/rocm/bin:/opt/rocm-7.2.4/bin:$PATH"
 # ldconfig search path; the system .conf file only points to /opt/rocm-5.4.1/lib.
 # Prepend rather than append so ROCm's libs win over any stale 5.4.1 versions.
 if [ -d /opt/rocm/lib ]; then
-    case ":$LD_LIBRARY_PATH:" in
+    # Note: ${LD_LIBRARY_PATH:-} is needed because the script runs with 'set -u',
+    # and LD_LIBRARY_PATH may be unset when launched from a minimal environment.
+    case ":${LD_LIBRARY_PATH:-}:" in
         *:/opt/rocm/lib:*) ;;  # already present
         *) export LD_LIBRARY_PATH="/opt/rocm/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" ;;
     esac
