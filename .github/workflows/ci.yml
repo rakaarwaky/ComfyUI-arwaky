@@ -22,7 +22,7 @@ jobs:
         working-directory: crates/launcher
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           submodules: recursive
 
@@ -71,7 +71,7 @@ jobs:
       image: fedora:44
       options: --user root
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install shellcheck
         run: dnf install -y shellcheck
@@ -87,7 +87,7 @@ jobs:
       image: fedora:44
       options: --user root
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install jq
         run: dnf install -y jq
@@ -115,7 +115,7 @@ jobs:
     name: Security Audit
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
