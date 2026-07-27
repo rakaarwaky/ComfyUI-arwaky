@@ -34,7 +34,7 @@ jobs:
           submodules: recursive
 
       - name: Install Python ${{ env.PYTHON_VERSION }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ env.PYTHON_VERSION }}
 
